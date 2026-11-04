@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+bool check(const vector<vector<int>> &graph, int x, int y, const int &n, const int &m) {
+    bool bad = false;
+
+    if (graph[x][y] == 1) {
+        bad = true;
+    }
+
+    if (x > 0 and graph[x - 1][y] == 3) {
+        bad = true;
+    } else if (x < n - 1 and graph[x + 1][y] == 3) {
+        bad = true;
+    } else if (y > 0 and graph[x][y - 1] == 3) {
+        bad = true;
+    } else if (y < m - 1 and graph[x][y + 1] == 3) {
+        bad = true;
+    }
+
+    return not bad;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t;
+
+    cin >> t;
+
+    for (int iteration = 0; iteration < t; iteration++) {
+        int n, m;
+
+        cin >> n >> m;
+
+        vector<vector<int>> graph(n, vector<int>(m));
+        int good_count = 0;
+
+        for (int i = 0; i < n; i++) {
+            string row;
+
+            cin >> row;
+
+            for (int j = 0; j < m; j++) {
+                if (row[j] == '.') {
+                    graph[i][j] = 0;
+                } else if (row[j] == '#') {
+                    graph[i][j] = 1;
+                } else if (row[j] == 'G') {
+                    graph[i][j] = 2;
+                    good_count += 1;
+                } else if (row[j] == 'B') {
+                    graph[i][j] = 3;
+                }
+            }
+        }
+
+        if (good_count == 0) {
+            cout << "YES" << "\n";
+        } else {
+            vector<vector<bool>> visited(n, vector<bool>(m, false));
+            queue<pair<int, int>> q;
+
+            if (check(graph, n - 1, m - 1, n, m)) {
+                visited[n - 1][m - 1] = true;
+                q.push({n - 1, m - 1});
+            }
+
+            int goods_reached = 0;
+
+            while (not q.empty() and goods_reached < good_count) {
+                int x = q.front().first;
+                int y = q.front().second;
+                q.pop();
+
+                if (graph[x][y] == 2) {
+                    goods_reached += 1;
+                }
+
+                if (x > 0 and not visited[x - 1][y]) {
+                    if (check(graph, x - 1, y, n, m)) {
+                        q.push({x - 1, y});
+                    }
+
+                    visited[x - 1][y] = true;
+                }
+
+                if (x < n - 1 and not visited[x + 1][y]) {
+                    if (check(graph, x + 1, y, n, m)) {
+                        q.push({x + 1, y});
+                    }
+
+                    visited[x + 1][y] = true;
+                }
+
+                if (y > 0 and not visited[x][y - 1]) {
+                    if (check(graph, x, y - 1, n, m)) {
+                        q.push({x, y - 1});
+                    }
+
+                    visited[x][y - 1] = true;
+                }
+
+                if (y < m - 1 and not visited[x][y + 1]) {
+                    if (check(graph, x, y + 1, n, m)) {
+                        q.push({x, y + 1});
+                    }
+
+                    visited[x][y + 1] = true;
+                }
+            }
+
+            if (goods_reached == good_count) {
+                cout << "YES" << "\n";
+            } else {
+                cout << "NO" << "\n";
+            }
+        }
+    }
+
+    return 0;
+}
